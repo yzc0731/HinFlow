@@ -1,0 +1,12 @@
+[submodule "co-tracker"]
+	path = third_party/co-tracker
+	url = git@github.com:facebookresearch/co-tracker.git
+[submodule "robomimic"]
+	path = third_party/robomimic
+	url = git@github.com:ARISE-Initiative/robomimic.git
+[submodule "robosuite"]
+	path = third_party/robosuite
+	url = git@github.com:ARISE-Initiative/robosuite.git
+[submodule "third_party/maniskill"]
+	path = third_party/maniskill
+	url = git@github.com:yzc0731/ManiSkill_HinFlow.git

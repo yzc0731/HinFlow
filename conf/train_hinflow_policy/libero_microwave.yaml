@@ -1,0 +1,100 @@
+defaults:
+  - agent_cfg: hinflow
+  - _self_
+
+experiment: ??? # tag for wandb and log dir
+
+hydra:
+  run:
+    dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
+  sweep:
+    dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
+    subdir: ${hydra.job.num}
+
+wandb:
+  project: atm_policy
+  name: ${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}_${hydra:job.num}
+  group: ${experiment}
+
+train_gpus: [0]
+
+# Training
+lr: 5e-4
+batch_size: 64
+mix_precision: false
+num_workers: 8
+val_freq: 5
+save_freq: 10
+epochs: 101
+seed: 0
+dry: true
+
+img_size: 128
+frame_stack: 2
+num_track_ts: 8
+num_track_ids: 32
+extra_state_keys: ['joint_states', 'gripper_states']
+camera_names: ["agentview", "eye_in_hand_high"]
+horizon: 300
+aug_prob: 0.9
+
+action_chunk: 5
+track_repeat: 16
+
+robot: ???
+
+num_train_frames: 80001
+eval_every_frames: 2500
+num_env_rollouts: 10
+save_train_video: true
+save_all_video: true
+keep_pretrain_buffer: true
+disable_rotate: true
+rotation_cfg:
+  enable_x_rotate: false
+  enable_y_rotate: false
+  enable_z_rotate: false
+gripper_explore: true
+
+load_pretrain_data_path: data/policy_dataset/libero_microwave
+
+load_ckpt: null
+
+pretrain_frames: 10000
+pretrain_eval_every_frames: 10000
+
+env_cfg:
+  env_type: libero
+  robot: ${robot}
+  render_gpu_ids: 0
+  vec_env_num: 1
+  horizon: ${horizon}
+  env_name: []
+  task_name: []
+  env_meta_fn: []
+  render_large_image: true
+  camera_names: ["agentview", "robot0_eye_in_hand_high"]
+
+replay_buffer_cfg:
+  max_buffer_size: 80000
+  batch_size: ${batch_size}
+  num_track_ids: ${num_track_ids}
+  frame_stack: ${frame_stack}
+  action_chunk: ${action_chunk}
+  aug_prob: 0.9
+  img_size: ${img_size}
+  augment_track: true
+  track_len: ${num_track_ts}
+  use_continous_track: false
+  track_repeat: ${track_repeat}
+
+noise_sampler_name: GaussianNoise
+noise_sampler_cfg:
+  act_shape: [7]
+  sigma: 0.1
+
+segment_sampler_cfg:
+  segmentation_id: [74, 110, [159, 160]]
+  num_points: [16, 8, 8]
+  repeat: ${track_repeat}
+  obs_raw_keys: extra_states/agentview_segmentation

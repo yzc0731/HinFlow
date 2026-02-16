@@ -1,0 +1,1 @@
+libero/bddl_files/libero_test/pick_up_the_butter_and_place_it_in_the_basket.bddl
