@@ -44,7 +44,7 @@ Because the ManiSkill data format is different from LIBERO, we provide a script 
 
 ### Dataset Preprocessing
 
-Dataset need to be preprocessed with [Cotracker](https://arxiv.org/abs/2307.07635) or [Cotracker3](https://arxiv.org/abs/2410.11831):
+Dataset need to be preprocessed with [Cotracker](https://github.com/facebookresearch/co-tracker):
 
 ```sh
 python -m scripts.preprocess \
@@ -109,6 +109,17 @@ Evaluation scripts:
 ```sh
 python -m scripts.eval_baseline --task=${task} --exp-dir=path/to/your/exp/dir --planner=${planner_path} --mode=${mode}
 ```
+
+## Acknowledgement
+
+Thanks to these excellent open source projects:
+
+- [ATM](https://github.com/Large-Trajectory-Model/ATM)
+- [LIBERO](https://github.com/Lifelong-Robot-Learning/LIBERO)
+- [ManiSkill](https://github.com/haosulab/ManiSkill)
+- [CoTracker](https://github.com/facebookresearch/co-tracker)
+- [Robosuite](https://github.com/ARISE-Initiative/robosuite)
+- [Robomimic](https://github.com/ARISE-Initiative/robomimic)
 
 ## Citation
 
