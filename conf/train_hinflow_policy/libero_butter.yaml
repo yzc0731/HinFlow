@@ -84,7 +84,6 @@ replay_buffer_cfg:
   img_size: ${img_size}
   augment_track: true
   track_len: ${num_track_ts}
-  use_continous_track: false
   track_repeat: ${track_repeat}
 
 noise_sampler_name: GaussianNoise

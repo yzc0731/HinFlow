@@ -16,8 +16,6 @@ class Buffer():
         self.fabric = fabric
         self._episode = 0
         self.slice_len = cfg.frame_stack
-        if cfg.use_continous_track:
-            self.slice_len += cfg.track_len - 1
         self._buffer = self._make_replay_buffer()
         self.augment_track = cfg.augment_track
         self.aug_prob = cfg.aug_prob
@@ -108,30 +106,6 @@ class Buffer():
                 assert pred_track.shape == track.shape, f"pred_track shape {pred_track.shape} != track shape {track.shape}"
 
         data_fs = data
-        if self.cfg.use_continous_track:
-            track_len = torch.randint(self.cfg.track_len - 1, [b])
-            track_len = self.fabric.to_device(track_len)
-            index = track_len.unsqueeze(-1) + torch.arange(self.cfg.frame_stack+1, device=track_len.device)
-            batch_idx = torch.arange(b, device=track_len.device).unsqueeze(1)
-
-            data_fs = data.gather(dim=1, index=index) # (b, fs+1, ...)
-            obs = rearrange(obs, "b v t c h w -> b t v c h w")
-            obs = obs[batch_idx, index]
-            obs = rearrange(obs, "b t v c h w -> b v t c h w")
-
-            track_index = track_len.unsqueeze(-1) + torch.arange(self.cfg.track_len, device=track_len.device)
-            track = track[:, :, :self.cfg.frame_stack] # (b, v, fs, track_len, n, 2)
-            track_padded = torch.cat([track, track[:, :, :, [-1]].repeat_interleave(self.cfg.track_len+1, dim=3)], dim=3)  # (b, v, t, track_len+ts, n, 2)
-            track_padded = track_padded.transpose(1, 3) # (b, track_len+ts, t, v, n, 2)
-            track = track_padded[batch_idx, track_index]  # (b, track_len, t, v, n, 2)
-            track = track.transpose(1, 3) # (b, v, t, track_len, n, 2)
-            
-            if pred_track is not None:
-                pred_track = pred_track[:, :, :self.cfg.frame_stack]
-                pred_track_padded = torch.cat([pred_track, pred_track[:, :, :, [-1]].repeat_interleave(self.cfg.track_len+1, dim=3)], dim=3)  # (b, v, t, track_len+ts, n, 2)
-                pred_track_padded = pred_track_padded.transpose(1, 3) # (b, track_len+ts, t, v, n, 2)
-                pred_track = pred_track_padded[batch_idx, track_index]  # (b, track_len, t, v, n, 2)
-                pred_track = pred_track.transpose(1, 3) # (b, v, t, track_len, n, 2)
 
         processed_data = {
             "obs": obs,
@@ -144,8 +118,6 @@ class Buffer():
             processed_data["pred_track"] = pred_track
         if "reward" in data:
             processed_data["reward"] = data_fs["reward"]
-        if self.cfg.use_continous_track:
-            processed_data["track_len"] = (self.cfg.track_len - 1) - track_len # (b,) range: [1, track_len)
         return processed_data
     
     def add(self, td):
